@@ -97,12 +97,14 @@ def reporting_unit_associations():
     token = request.headers.get("token")
     data = validate_token(token)
 
-    result = {"reporting_units": []}
+    data["reporting_units"] = []
     if data and "respondent_id" in data:
         for association in associations:
             if association["respondent_id"] == data["respondent_id"]:
-                add_association(association, result)
-        return jsonify(result)
+                add_association(association, data["reporting_units"])
+
+        token = encode(data)
+        return jsonify({"data": data, "token": token})
     return known_error("Please provide a 'token' header containing a JWT with a respondent_id value.")
 
 
