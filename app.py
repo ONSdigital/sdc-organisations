@@ -101,7 +101,7 @@ def reporting_unit_associations():
     if data and "respondent_id" in data:
         for association in associations:
             if association["respondent_id"] == data["respondent_id"]:
-                add_association(association, data["reporting_units"])
+                add_association(association, data)
 
         token = encode(data)
         return jsonify({"data": data, "token": token})
