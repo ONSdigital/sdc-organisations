@@ -41,9 +41,9 @@ print(" >>> Logging in and collecting tokens... (" + url + ")")
 
 # Email address options
 
-# email = "florence.nightingale@example.com"
+email = "florence.nightingale@example.com"
 # email = "chief.boyce@example.com"
-email = "fireman.sam@example.com"
+# email = "fireman.sam@example.com"
 # email = "rob.dabank@example.com"
 
 
@@ -73,7 +73,7 @@ print(" <<< Token      : " + token)
 print(" <<< Respondent : " + repr(respondent))
 
 
-component = "sdc-authorisation-user"
+component = "sdc-organisations"
 url = "https://" + component + ".herokuapp.com"
 # url = "http://localhost:5001"
 print("\n\n *** Testing " + component + " at " + url)
@@ -81,19 +81,20 @@ print("\n\n *** Testing " + component + " at " + url)
 
 # Questionnaires for the respondent unit
 
-uri = "/associations"
+uri = "/reporting_units"
 if respondent:
     print("\n --- " + uri + " ---")
     print(" >>> Respondent ID: " + repr(respondent["respondent_id"]))
     result = get(url + uri, headers={"token": token})
     if result["status"] == 200:
         json = result["json"]
-        token = json["token"]
-        print(" <<< Token: " + token)
-        content = get_json(token)
-        print("Token content: " + dumps(content, sort_keys=True, indent=4, separators=(',', ': ')))
-        associations = json["associations"]
-        print(" <<< " + str(len(associations)) + " result(s): " + repr(associations))
+        print(json)
+        #token = json["token"]
+        #print(" <<< Token: " + token)
+        #content = get_json(token)
+        #print("Token content: " + dumps(content, sort_keys=True, indent=4, separators=(',', ': ')))
+        #associations = json["associations"]
+        #print(" <<< " + str(len(associations)) + " result(s): " + repr(associations))
     else:
         print("Error: " + str(result["status"]) + " - " + repr(result["text"]))
 else:
