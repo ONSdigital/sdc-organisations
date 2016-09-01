@@ -6,6 +6,8 @@ from app import app
 from jose import jwt
 from jwt import encode, JWT_ALGORITHM
 
+login_url = "https://sdc-login-user.herokuapp.com/login"
+
 # Email address options
 email = "florence.nightingale@example.com"
 # email = "chief.boyce@example.com"
@@ -15,7 +17,8 @@ email = "florence.nightingale@example.com"
 ok = 200
 unauthorized = 401
 
-token = None
+valid_token = None
+
 
 class ComponentTestCase(unittest.TestCase):
 
@@ -87,29 +90,6 @@ class ComponentTestCase(unittest.TestCase):
         self.assertTrue("token" in json)
         self.assertTrue("reporting_units" in get_json(json["token"]))
 
-    def stuff(self):
-
-        # Questionnaires for the respondent unit
-
-        uri = "/reporting_units"
-        if self.respondent:
-            print("\n --- " + uri + " ---")
-            print(" >>> Respondent ID: " + repr(self.respondent["respondent_id"]))
-            result = self.app.get(self.url + uri, headers={"token": self.token})
-            if result["status"] == 200:
-                json = result["json"]
-                print(json)
-                token = json["token"]
-                print(" <<< Token: " + token)
-                content = get_json(token)
-                print("Token content: " + dumps(content, sort_keys=True, indent=4, separators=(',', ': ')))
-                reporting_units = content["reporting_units"]
-                print(" <<< " + str(len(reporting_units)) + " result(s): " + repr(reporting_units))
-            else:
-                print("Error: " + str(result["status"]) + " - " + repr(result["text"]))
-        else:
-            print(" * No respondent to query.")
-
 
 def process(response):
     if response.status_code < 400:
@@ -125,29 +105,35 @@ def process(response):
         }
 
 
-def get(url, parameters={}, headers={}):
+def get(url, parameters=None, headers=None):
+    if parameters is None:
+        parameters = {}
+    if headers is None:
+        headers = {}
     response = requests.get(url, params=parameters, headers=headers)
     return process(response)
 
 
-def post(url, json, headers={}):
+def post(url, json, headers=None):
+    if headers is None:
+        headers = {}
     headers["Content-Type"] = "application/json"
     response = requests.post(url, data=json, headers=headers)
     return process(response)
 
 
 def log_in():
+    global valid_token
     # Account login
-    url = "https://sdc-login-user.herokuapp.com/login"
-    print(" >>> Logging in and collecting tokens... (" + url + ")")
+    print(" >>> Logging in and collecting tokens... (" + login_url + ")")
     message = {"email": email}
-    result = post(url, dumps(message))
+    result = post(login_url, dumps(message))
     if result["status"] == 200:
         json = result["json"]
-        token = json["token"]
+        valid_token = json["token"]
     else:
         print("Error: " + str(result["status"]) + " - " + repr(result["text"]))
-    print(" <<< Token      : " + token)
+    print(" <<< Token      : " + valid_token)
 
 
 if __name__ == '__main__':
