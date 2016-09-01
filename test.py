@@ -1,17 +1,114 @@
 import requests
-from json import dumps
+from json import loads, dumps
 from decoder import get_json
+import unittest
+from app import app
+from jose import jwt
+from jwt import encode, JWT_ALGORITHM
 
+# Email address options
+email = "florence.nightingale@example.com"
+# email = "chief.boyce@example.com"
+# email = "fireman.sam@example.com"
+# email = "rob.dabank@example.com"
 
-def get(url, parameters={}, headers={}):
-    response = requests.get(url, params=parameters, headers=headers)
-    return process(response)
+ok = 200
+unauthorized = 401
 
+token = None
 
-def post(url, json, headers={}):
-    headers["Content-Type"] = "application/json"
-    response = requests.post(url, data=json, headers=headers)
-    return process(response)
+class ComponentTestCase(unittest.TestCase):
+
+    def setUp(self):
+        app.config['TESTING'] = True
+        self.app = app.test_client()
+
+    def tearDown(self):
+        pass
+
+    def test_should_return_unauthorized_for_no_token(self):
+
+        # Given
+        # A request with no "token" header
+
+        # When
+        # We try to get reporting units
+        response = self.app.get("/reporting_units")
+
+        # Then
+        # We should get a bad request status code
+        self.assertEqual(response.status_code, unauthorized)
+
+    def test_should_return_unauthorized_for_invalid_token(self):
+
+        # Given
+        # An invalid token
+        token = jwt.encode({"respondent_id": "111"}, "wrong key", algorithm=JWT_ALGORITHM)
+
+        # When
+        # We try to get reporting units with the token
+        response = self.app.get("/reporting_units", headers={"token": token})
+
+        # Then
+        # We should get an unauthorized status code
+        self.assertEqual(response.status_code, unauthorized)
+
+    def test_should_return_unauthorized_for_token_without_respondent_id(self):
+
+        # Given
+        # A token that doesn't contain a "respondent_id" value
+        token = encode({"user_id": "111"})
+
+        # When
+        # We try to get reporting units with the token
+        response = self.app.get("/reporting_units", headers={"token": token})
+
+        # Then
+        # We should get an unauthorized status code
+        self.assertEqual(response.status_code, unauthorized)
+
+    def test_should_return_reporting_units_for_valid_token(self):
+
+        # Given
+        # A valid token and an expected association
+        token = encode({"respondent_id": "111"})
+
+        # When
+        # We try to get reporting units with the token
+        response = self.app.get("/reporting_units", headers={"token": token})
+
+        # Then
+        # We should get a response containing "reporting_units" in the data and the updated token.
+        self.assertEqual(response.status_code, ok)
+        string = response.data.decode()
+        json = loads(string)
+        self.assertTrue("data" in json)
+        self.assertTrue("reporting_units" in json["data"])
+        self.assertTrue("token" in json)
+        self.assertTrue("reporting_units" in get_json(json["token"]))
+
+    def stuff(self):
+
+        # Questionnaires for the respondent unit
+
+        uri = "/reporting_units"
+        if self.respondent:
+            print("\n --- " + uri + " ---")
+            print(" >>> Respondent ID: " + repr(self.respondent["respondent_id"]))
+            result = self.app.get(self.url + uri, headers={"token": self.token})
+            if result["status"] == 200:
+                json = result["json"]
+                print(json)
+                token = json["token"]
+                print(" <<< Token: " + token)
+                content = get_json(token)
+                print("Token content: " + dumps(content, sort_keys=True, indent=4, separators=(',', ': ')))
+                reporting_units = content["reporting_units"]
+                print(" <<< " + str(len(reporting_units)) + " result(s): " + repr(reporting_units))
+            else:
+                print("Error: " + str(result["status"]) + " - " + repr(result["text"]))
+        else:
+            print(" * No respondent to query.")
 
 
 def process(response):
@@ -28,75 +125,32 @@ def process(response):
         }
 
 
-# Test the authentication / authorisation API
-
-component = "sdc-login-user"
-url = "https://" + component + ".herokuapp.com"
-# url = "http://localhost:5000"
-print(" >>> Logging in and collecting tokens... (" + url + ")")
+def get(url, parameters={}, headers={}):
+    response = requests.get(url, params=parameters, headers=headers)
+    return process(response)
 
 
-# Data we're going to work through
+def post(url, json, headers={}):
+    headers["Content-Type"] = "application/json"
+    response = requests.post(url, data=json, headers=headers)
+    return process(response)
 
 
-# Email address options
-
-email = "florence.nightingale@example.com"
-# email = "chief.boyce@example.com"
-# email = "fireman.sam@example.com"
-# email = "rob.dabank@example.com"
-
-
-# Internet access code options
-
-access_code = "abc123"
-# access_code= "def456"
-# access_code= "ghi789"
-
-
-token = None
-respondent = None
-
-# Accout login
-
-uri = "/login"
-input = {"email": email}
-result = post(url + uri, dumps(input))
-if result["status"] == 200:
-    json = result["json"]
-    token = json["token"]
-    respondent = get_json(token)
-else:
-    print("Error: " + str(result["status"]) + " - " + repr(result["text"]))
-
-print(" <<< Token      : " + token)
-print(" <<< Respondent : " + repr(respondent))
-
-
-component = "sdc-organisations"
-url = "https://" + component + ".herokuapp.com"
-# url = "http://localhost:5001"
-print("\n\n *** Testing " + component + " at " + url)
-
-
-# Questionnaires for the respondent unit
-
-uri = "/reporting_units"
-if respondent:
-    print("\n --- " + uri + " ---")
-    print(" >>> Respondent ID: " + repr(respondent["respondent_id"]))
-    result = get(url + uri, headers={"token": token})
+def log_in():
+    # Account login
+    url = "https://sdc-login-user.herokuapp.com/login"
+    print(" >>> Logging in and collecting tokens... (" + url + ")")
+    message = {"email": email}
+    result = post(url, dumps(message))
     if result["status"] == 200:
         json = result["json"]
-        print(json)
-        #token = json["token"]
-        #print(" <<< Token: " + token)
-        #content = get_json(token)
-        #print("Token content: " + dumps(content, sort_keys=True, indent=4, separators=(',', ': ')))
-        #associations = json["associations"]
-        #print(" <<< " + str(len(associations)) + " result(s): " + repr(associations))
+        token = json["token"]
     else:
         print("Error: " + str(result["status"]) + " - " + repr(result["text"]))
-else:
-    print(" * No respondent to query.")
+    print(" <<< Token      : " + token)
+
+
+if __name__ == '__main__':
+    log_in()
+    unittest.main()
 
