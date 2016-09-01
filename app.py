@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from jwt import encode, decode
-from jose.exceptions import JWSError
+from jose.exceptions import JWTError
 from copy import copy
 
 
@@ -97,15 +97,15 @@ def reporting_unit_associations():
     token = request.headers.get("token")
     data = validate_token(token)
 
-    data["reporting_units"] = []
     if data and "respondent_id" in data:
+        data["reporting_units"] = []
         for association in associations:
             if association["respondent_id"] == data["respondent_id"]:
                 add_association(association, data)
 
         token = encode(data)
         return jsonify({"data": data, "token": token})
-    return known_error("Please provide a 'token' header containing a JWT with a respondent_id value.")
+    return unauthorized("Please provide a 'token' header containing a valid JWT with a respondent_id value.")
 
 
 @app.errorhandler(401)
@@ -152,7 +152,7 @@ def validate_token(token):
     if token:
         try:
             return decode(token)
-        except JWSError:
+        except JWTError:
             return ""
 
 
