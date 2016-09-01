@@ -1,7 +1,7 @@
 from jose import jwt
 
 def get_json(token):
-    return jwt.decode(token, "", "HS256", options={"verify_signature": False})
+    return jwt.get_unverified_claims(token)
 
 if __name__ == '__main__':
     # Show we can decode a token without validating the signature, so that we can see the values sent back from the server:
