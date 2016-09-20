@@ -13,6 +13,7 @@ email = "florence.nightingale@example.com"
 # email = "chief.boyce@example.com"
 # email = "fireman.sam@example.com"
 # email = "rob.dabank@example.com"
+password = "password"
 
 ok = 200
 unauthorized = 401
@@ -74,7 +75,7 @@ class ComponentTestCase(unittest.TestCase):
 
         # Given
         # A valid token and an expected association
-        token = encode({"respondent_id": "111"})
+        token = encode({"respondent_id": "101"})
 
         # When
         # We try to get reporting units with the token
@@ -126,7 +127,7 @@ def log_in():
     global valid_token
     # Account login
     print(" >>> Logging in and collecting tokens... (" + login_url + ")")
-    message = {"email": email}
+    message = {"email": email, "password": password}
     result = post(login_url, dumps(message))
     if result["status"] == 200:
         json = result["json"]
