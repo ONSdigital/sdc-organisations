@@ -181,7 +181,7 @@ def create_organisations():
     # Set up a lot of organisations:
     print("Generating organisations...")
     for organisation in organisations():
-        if counter < 20000:
+        if counter < 1000:
             record = Organisation(
                 name=organisation["name"],
                 reference=organisation["reference"]
