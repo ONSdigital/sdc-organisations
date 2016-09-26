@@ -7,6 +7,10 @@ from copy import copy
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
 import json
+from test_data.data_generator import surveys, organisations, people
+import random
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 
 app = Flask(__name__)
@@ -165,96 +169,97 @@ def create_database():
 
 def create_organisations():
 
-    reference = 1
+    engine = create_engine('sqlite:////tmp/sdc-organisations.db')
+    session = sessionmaker()
+    session.configure(bind=engine)
+    records = []
+
+    result = []
+
+    counter = 1
 
     # Set up a lot of organisations:
-    with open(os.path.abspath("test_data/words.txt")) as organisation_names:
-        print("Generating organisations...")
-        for organisation_name in organisation_names:
-            if reference < 20000:
-                organisation = Organisation(
-                    name=organisation_name.rstrip("\n"),
-                    reference="o"+repr(reference)
-                )
-                reference += 1
-                db.session.add(organisation)
+    print("Generating organisations...")
+    for organisation in organisations():
+        if counter < 20000:
+            record = Organisation(
+                name=organisation["name"],
+                reference=organisation["reference"]
+            )
+            counter += 1
+            records.append(record)
+            #db.session.add(record)
+            result.append(record.json())
 
-                if reference % 10000 == 0:
-                    print(reference)
+            if counter % 10000 == 0:
+                print(counter)
 
     print("Committing...")
-    db.session.commit()
+    #db.session.commit()
+    s = session()
+    s.bulk_save_objects(records)
+    s.commit()
     print("Done!")
+    print("Created " + repr(len(result)) + " organisations.")
 
-    # Just to see that test users are present
-    print(Organisation.query.filter_by(id=1674).first().json())
+    return result
 
 
-def create_associations():
+def create_associations(organisations):
     # This provides a many-to-many mapping between respondent, reporting_unit and survey_id.
     # These associations could carry additional information, such as validity dates (e.g. for maternity leave)
     # and information about who created/delegated access.
 
-    associations = [
-        {
-            "respondent_id": "101",
-            "reporting_unit": "o1674",
-            "survey_id": "023"
-        },
-        {
-            "respondent_id": "101",
-            "reporting_unit": "o1674",
-            "survey_id": "024"
-        },
-        {
-            "respondent_id": "101",
-            "reporting_unit": "o1674",
-            "survey_id": "025"
-        },
-        {
-            "respondent_id": "102",
-            "reporting_unit": "o8456",
-            "survey_id": "023"
-        },
-        {
-            "respondent_id": "103",
-            "reporting_unit": "o223",
-            "survey_id": "023"
-        },
-        {
-            "respondent_id": "104",
-            "reporting_unit": "o111",
-            "survey_id": "023"
-        }
-    ]
+    engine = create_engine('sqlite:////tmp/sdc-organisations.db')
+    session = sessionmaker()
+    session.configure(bind=engine)
+    records = []
 
     print("Creating associations...")
-    for association in associations:
-
-        record = Association(
-            organisation=association["reporting_unit"],
-            survey=association["survey_id"],
-            respondent=association["respondent_id"]
-        )
-        if Association.query.filter_by(
-                organisation=record.organisation,
-                survey=record.survey,
-                respondent=record.respondent
-                ).first() is None:
-            db.session.add(record)
+    total = 0
+    person_total = None
+    collection_instruments = surveys()
+    for organisation in organisations:
+        #print("Associating for " + organisation["name"] + " [" + organisation["reference"] + "]")
+        enrolments = random.sample(collection_instruments, random.randint(1, 5))
+        organisation_people = people(random.randint(2, 10))
+        for enrolment in enrolments:
+            #print(" - " + enrolment["name"] + " [" + enrolment["id"] + "]")
+            #respondents = random.sample(organisation_people, random.randint(1, len(organisation_people)))
+            for respondent in organisation_people:
+                if respondent["id"] == "101":
+                    print("   - " + respondent["name"] + " [" + respondent["id"] + "]")
+                record = Association(
+                    organisation=organisation["reference"],
+                    survey=enrolment["id"],
+                    respondent=respondent["id"]
+                )
+                if respondent["id"] == "101":
+                    print(" *** 101")
+                    print(organisation)
+                    print(enrolment)
+                    print(respondent)
+                    print("organisation: " + record.organisation + " survey: " + record.survey + " respondent: " + record.respondent)
+                records.append(record)
+                #db.session.add(record)
+                person_total = respondent["id"]
+                total += 1
 
     print("Committing...")
-    db.session.commit()
-    print("Done!")
-    print(Association.query.all())
+    #db.session.commit()
+    s = session()
+    s.bulk_save_objects(records)
+    s.commit()
+    print("Done. Created " + str(total) + " associations and " + person_total + " people.")
+    #print(Association.query.all())
 
 
 if __name__ == '__main__':
 
     # Create database
     create_database()
-    create_organisations()
-    create_associations()
+    organisations = create_organisations()
+    create_associations(organisations)
 
     # Start server
     port = int(os.environ.get("PORT", 5000))

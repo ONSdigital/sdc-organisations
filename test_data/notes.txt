@@ -1,0 +1,6 @@
+names: http://stackoverflow.com/questions/1803628/raw-list-of-person-names
+  - http://www2.census.gov/topics/genealogy/1990surnames/dist.all.last
+  - http://deron.meranda.us/data/census-derived-all-first.txt
+
+companies: http://www.sec.gov/rules/other/4-460list.htm
+

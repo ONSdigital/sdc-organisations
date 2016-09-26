@@ -93,6 +93,7 @@ class ComponentTestCase(unittest.TestCase):
         self.assertTrue("reporting_units" in json["data"])
         self.assertTrue("token" in json)
         self.assertTrue("reporting_units" in get_json(json["token"]))
+        print(json)
 
 
 def process(response):
@@ -142,8 +143,11 @@ def log_in():
 
 if __name__ == '__main__':
     log_in()
+
+    # Create database
     create_database()
-    create_organisations()
-    create_associations()
+    organisations = create_organisations()
+    create_associations(organisations)
+
     unittest.main()
 
