@@ -68,6 +68,26 @@ class Organisation(db.Model):
                 "name": self.name}
 
 
+# Survey model
+class Survey(db.Model):
+
+    # Columns
+    id = Column(Integer, primary_key=True)
+    reference = Column(String(10))
+    name = Column(String(255))
+
+    def __init__(self, reference=None, name=None):
+        self.reference = reference
+        self.name = name
+
+    def __repr__(self):
+        return '<Organisation %r>' % self.name
+
+    def json(self):
+        return {"reference": self.reference,
+                "name": self.name}
+
+
 @app.route('/', methods=['GET'])
 def info():
     return """
@@ -181,7 +201,7 @@ def create_organisations():
     # Set up a lot of organisations:
     print("Generating organisations...")
     for organisation in organisations():
-        if counter < 1000:
+        if counter < 100:
             record = Organisation(
                 name=organisation["name"],
                 reference=organisation["reference"]
