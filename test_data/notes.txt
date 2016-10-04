@@ -4,3 +4,14 @@ names: http://stackoverflow.com/questions/1803628/raw-list-of-person-names
 
 companies: http://www.sec.gov/rules/other/4-460list.htm
 
+Numbers from Martin Thomas:
+
+Surveys 136
+Collection Exercises 379
+Reporting Units 1,151,961
+Respondents 1,214,167
+Enrolments 1,214,167
+Reporting Unit Associations 1,214,167
+Collection Instruments 136
+Collection Responses 1,816,070
+
