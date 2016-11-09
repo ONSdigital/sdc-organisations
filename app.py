@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 
 # service name (initially used for sqlite file name and schema name)
 SERVICE_NAME = 'bsdc-organisation'
+ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME', 'dev')
 
 app = Flask(__name__)
 
@@ -24,13 +25,14 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:////tmp/{}.db'.format(SERVICE_NAME))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+SCHEMA_NAME = None if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite') else '{}_{}'.format(ENVIRONMENT_NAME, SERVICE_NAME)
 
 
 # Association model
 # NB: for delegation we could add start/end dates to associations,
 #     which might enable us to fulfil a bunch of user needs (e.g. maternity leave).
 class Association(db.Model):
-    __table_args__ = {'schema': SERVICE_NAME}
+    __table_args__ = {'schema': SCHEMA_NAME}
     # Columns
     id = Column(Integer, primary_key=True)
     organisation = Column(String(10))
@@ -53,7 +55,7 @@ class Association(db.Model):
 
 # Organisation model
 class Organisation(db.Model):
-    __table_args__ = {'schema': SERVICE_NAME}
+    __table_args__ = {'schema': SCHEMA_NAME}
     # Columns
     id = Column(Integer, primary_key=True)
     reference = Column(String(10))
@@ -73,7 +75,7 @@ class Organisation(db.Model):
 
 # Survey model
 class Survey(db.Model):
-    __table_args__ = {'schema': SERVICE_NAME}
+    __table_args__ = {'schema': SCHEMA_NAME}
     # Columns
     id = Column(Integer, primary_key=True)
     reference = Column(String(10))
