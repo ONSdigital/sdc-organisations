@@ -9,7 +9,7 @@ from sqlalchemy import Column, Integer, String
 import json
 from test_data.data_generator import surveys, organisations, people
 import random
-from sqlalchemy import create_engine
+from sqlalchemy import DDL, create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 # service name (initially used for sqlite file name and schema name)
@@ -187,8 +187,9 @@ def validate_token(token):
 
 
 def create_database():
-
     db.drop_all()
+    if SCHEMA_NAME:
+        event.listen(db.Model.metadata, 'before_create', DDL('CREATE SCHEMA IF NOT EXISTS "{}"'.format(SCHEMA_NAME)))
     db.create_all()
 
 
