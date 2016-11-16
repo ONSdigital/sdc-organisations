@@ -186,22 +186,19 @@ def validate_token(token):
             return ""
 
 
-def create_database():
-    db.drop_all()
+def recreate_database():
     if SCHEMA_NAME:
-        event.listen(db.Model.metadata, 'before_create', DDL('CREATE SCHEMA IF NOT EXISTS "{}"'.format(SCHEMA_NAME)))
+        sql = ('DROP SCHEMA IF EXISTS "{0}" CASCADE;'
+               'CREATE SCHEMA IF NOT EXISTS "{0}"'.format(SCHEMA_NAME))
+        event.listen(db.Model.metadata, 'before_create', DDL(sql))
+    else:
+        db.drop_all()
     db.create_all()
 
 
 def create_organisations():
-
-    engine = create_engine('sqlite:////tmp/{}.db'.format(SERVICE_NAME))
-    session = sessionmaker()
-    session.configure(bind=engine)
     records = []
-
     result = []
-
     counter = 1
 
     # Set up a lot of organisations:
@@ -214,19 +211,16 @@ def create_organisations():
             )
             counter += 1
             records.append(record)
-            #db.session.add(record)
+            db.session.add(record)
             result.append(record.json())
 
             if counter % 10000 == 0:
                 print(counter)
 
     print("Committing...")
-    #db.session.commit()
-    s = session()
-    s.bulk_save_objects(records)
-    s.commit()
+    db.session.commit()
     print("Done!")
-    print("Created " + repr(len(result)) + " organisations.")
+    print("Created {} organisations.".format(len(result)))
 
     return result
 
@@ -236,12 +230,8 @@ def create_associations(organisations):
     # These associations could carry additional information, such as validity dates (e.g. for maternity leave)
     # and information about who created/delegated access.
 
-    engine = create_engine('sqlite:////tmp/{}.db'.format(SERVICE_NAME))
-    session = sessionmaker()
-    session.configure(bind=engine)
-    records = []
-
     print("Creating associations...")
+    records = []
     total = 0
     person_total = None
     collection_instruments = surveys()
@@ -267,25 +257,22 @@ def create_associations(organisations):
                     print(respondent)
                     print("organisation: " + record.organisation + " survey: " + record.survey + " respondent: " + record.respondent)
                 records.append(record)
-                #db.session.add(record)
+                db.session.add(record)
                 person_total = respondent["id"]
                 total += 1
 
     print("Committing...")
-    #db.session.commit()
-    s = session()
-    s.bulk_save_objects(records)
-    s.commit()
-    print("Done. Created " + str(total) + " associations and " + person_total + " people.")
+    db.session.commit()
+    print("Done. Created {} associations and {} people.".format(total, person_total))
     #print(Association.query.all())
 
 
 if __name__ == '__main__':
-
-    # Create database
-    create_database()
-    organisations = create_organisations()
-    create_associations(organisations)
+    # create and populate db only if in main process (Werkzeug also spawns a child process)
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        recreate_database()
+        organisations = create_organisations()
+        create_associations(organisations)
 
     # Start server
     port = int(os.environ.get('PORT', 5010))

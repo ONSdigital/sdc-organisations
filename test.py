@@ -5,7 +5,7 @@ import unittest
 from app import app
 from jose import jwt
 from jwt import encode, JWT_ALGORITHM
-from app import create_database
+from app import recreate_database
 from app import create_organisations
 from app import create_associations
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     log_in()
 
     # Create database
-    create_database()
+    recreate_database()
     organisations = create_organisations()
     create_associations(organisations)
 
