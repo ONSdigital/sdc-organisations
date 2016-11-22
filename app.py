@@ -9,7 +9,7 @@ from sqlalchemy import Column, Integer, String
 import json
 from test_data.data_generator import surveys, organisations, people
 import random
-from sqlalchemy import DDL, create_engine, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # service name (initially used for sqlite file name and schema name)
@@ -26,6 +26,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'sq
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 SCHEMA_NAME = None if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite') else '{}_{}'.format(ENVIRONMENT_NAME, SERVICE_NAME)
+
+if os.getenv('SQL_DEBUG') == 'true':
+    import logging
+    import sys
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
 
 # Association model
@@ -190,7 +196,7 @@ def recreate_database():
     if SCHEMA_NAME:
         sql = ('DROP SCHEMA IF EXISTS "{0}" CASCADE;'
                'CREATE SCHEMA IF NOT EXISTS "{0}"'.format(SCHEMA_NAME))
-        event.listen(db.Model.metadata, 'before_create', DDL(sql))
+        db.engine.execute(sql)
     else:
         db.drop_all()
     db.create_all()
