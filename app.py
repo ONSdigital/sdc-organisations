@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # service name (initially used for sqlite file name and schema name)
-SERVICE_NAME = 'bsdc-organisation'
+SERVICE_NAME = 'sdc-organisations'
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME', 'dev')
 
 app = Flask(__name__)
