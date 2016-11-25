@@ -147,6 +147,25 @@ def reporting_unit_associations():
     return unauthorized("Please provide a 'token' header containing a valid JWT with a respondent_id value.")
 
 
+@app.route('/respondent_ids', methods=['GET'])
+def respondent_ids():
+    token = request.headers.get('token')
+    if validate_token(token) is not None:
+
+        reporting_unit_ref = request.args.get('reporting_unit_ref')
+        survey_ref = request.args.get('survey_ref')
+
+        if reporting_unit_ref and survey_ref:
+            # Load all associations for this user
+            associations = Association.query.filter_by(organisation=reporting_unit_ref, survey=survey_ref)
+            result = {'respondents': [a.respondent for a in associations]}
+            return jsonify(result)
+
+        return unauthorized("Please provide reporting_unit_ref and survey_ref query string args.")
+
+    return unauthorized("Please provide a 'token' header containing a valid JWT.")
+
+
 @app.errorhandler(401)
 def unauthorized(error=None):
     app.logger.error("Unauthorized: '%s'", request.data.decode('UTF8'))
@@ -184,12 +203,10 @@ def unknown_error(error=None):
 
 
 def validate_token(token):
-
-    if token:
-        try:
-            return decode(token)
-        except JWTError:
-            return ""
+    try:
+        return decode(token)
+    except Exception:
+        return None
 
 
 def recreate_database():
