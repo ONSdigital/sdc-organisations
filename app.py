@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 # service name (initially used for sqlite file name and schema name)
 SERVICE_NAME = 'sdc-organisations'
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME', 'dev')
+PORT = int(os.environ.get('PORT', 5010))
 
 app = Flask(__name__)
 
@@ -298,5 +299,4 @@ if __name__ == '__main__':
         create_associations(organisations)
 
     # Start server
-    port = int(os.environ.get('PORT', 5010))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=PORT)
