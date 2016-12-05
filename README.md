@@ -23,7 +23,7 @@ The following endpoints are available on this service:
 This endpoint returns a map of: 
 
 ```json
-{organisation_ref : {
+{"organisation_ref" : {
     "organisation": {
         "name": "..." , 
         "reference": "..." 
@@ -40,7 +40,14 @@ This endpoint returns a map of:
 
 *NB* You'll need to provide your JWT token in a *token* header.
 
-This endpoint returns: {'respondents': [ ... list of respondent references ... ]}
+This endpoint returns:
+
+```json
+{"respondents" : [ 
+    "... list of respondent references ..."
+  ]
+}
+```
 
 ## Links
 
