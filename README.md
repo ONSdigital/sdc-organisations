@@ -25,11 +25,11 @@ This endpoint returns a map of:
 ```json
 {organisation_ref : {
     "organisation": {
-        "name": ... , 
-        "reference": ... 
+        "name": "..." , 
+        "reference": "..." 
     }, 
     "surveys": [ 
-        ... list of survey references ...
+        "... list of survey references ..."
     ]
 }
 ```
