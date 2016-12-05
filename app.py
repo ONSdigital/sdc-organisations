@@ -42,7 +42,7 @@ class Association(db.Model):
     __table_args__ = {'schema': SCHEMA_NAME}
     # Columns
     id = Column(Integer, primary_key=True)
-    organisation = Column(String(10))
+    organisation = Column(String(11))
     survey = Column(String(10))
     respondent = Column(String(10))
 
@@ -65,7 +65,7 @@ class Organisation(db.Model):
     __table_args__ = {'schema': SCHEMA_NAME}
     # Columns
     id = Column(Integer, primary_key=True)
-    reference = Column(String(10))
+    reference = Column(String(11))
     name = Column(String(255))
 
     def __init__(self, reference=None, name=None):
