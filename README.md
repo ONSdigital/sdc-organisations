@@ -20,7 +20,19 @@ The following endpoints are available on this service:
 
 *NB* You'll need to provide your JWT token in a *token* header.
 
-This endpoint returns a map of: {organisation_ref : {"organisation": {"name": ... , "reference": ... }, "surveys": [ ... list of survey references ...]}
+This endpoint returns a map of: 
+
+```json
+{organisation_ref : {
+    "organisation": {
+        "name": ... , 
+        "reference": ... 
+    }, 
+    "surveys": [ 
+        ... list of survey references ...
+    ]
+}
+```
 
 ### /respondent_ids
 
