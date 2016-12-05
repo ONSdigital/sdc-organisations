@@ -36,7 +36,7 @@ This endpoint returns a map of:
 
 ### /respondent_ids
 
-*GET* a list of all respondents for a given RU and survey combination.
+*GET* a list of all respondents for a given RU and survey combination. You'll need to pass two parameters: *reporting_unit_ref* and *survey_ref*
 
 *NB* You'll need to provide your JWT token in a *token* header.
 
