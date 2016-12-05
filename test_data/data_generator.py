@@ -1,5 +1,6 @@
 import os
 import random
+import re
 
 first_names_file = os.path.abspath("test_data/first_names.txt")
 last_names_file = os.path.abspath("test_data/last_names.txt")
@@ -8,6 +9,11 @@ companies_file = os.path.abspath("test_data/companies.txt")
 
 person_counter = 1
 
+def abbreviate(text):
+    blacklist = ['and', 'of', 'in', 'the', 'by', 'for']
+    words = re.findall('\w+', text)
+    first_letters = [word[0] for word in words if word not in blacklist]
+    return ''.join(first_letters).upper()
 
 def people(number):
     global person_counter
@@ -24,7 +30,8 @@ def people(number):
 
     result = []
     for i in range(1, number):
-        person = {"name": random.choice(first) + " " + random.choice(last), "id": repr(person_counter)}
+        #person = {"name": random.choice(first) + " " + random.choice(last), "id": repr(person_counter)}
+        person = {"name": first[i] + " " + last[i], "id": repr(person_counter)}
         result.append(person)
         person_counter += 1
         if person["id"] == "101":
@@ -38,7 +45,7 @@ def surveys():
     result = []
     with open(surveys_file) as survey_names:
         for survey_name in survey_names:
-            result.append({"name": survey_name.rstrip("\n"), "id": "s" + repr(counter)})
+            result.append({"name": survey_name.rstrip("\n"), "id": abbreviate(survey_name.rstrip("\n"))})
             counter += 1
 
     return result
@@ -49,7 +56,8 @@ def organisations():
     result = []
     with open(companies_file) as organisation_names:
         for organisation_name in organisation_names:
-            result.append({"name": organisation_name.rstrip("\n"), "reference": "o" + repr(counter)})
+            org_ref, org_name = organisation_name.split('|')
+            result.append({"name": org_name.rstrip("\n"), "reference": org_ref})
             counter += 1
 
     return result

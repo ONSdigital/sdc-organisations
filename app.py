@@ -260,8 +260,11 @@ def create_associations(organisations):
     collection_instruments = surveys()
     for organisation in organisations:
         #print("Associating for " + organisation["name"] + " [" + organisation["reference"] + "]")
-        enrolments = random.sample(collection_instruments, random.randint(1, 5))
-        organisation_people = people(random.randint(2, 10))
+        #enrolments = random.sample(collection_instruments, random.randint(1, 5))
+        enrolments = collection_instruments[:5]
+
+        #organisation_people = people(random.randint(2, 10))
+        organisation_people = people(2)
         for enrolment in enrolments:
             #print(" - " + enrolment["name"] + " [" + enrolment["id"] + "]")
             #respondents = random.sample(organisation_people, random.randint(1, len(organisation_people)))

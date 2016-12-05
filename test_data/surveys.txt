@@ -1,3 +1,4 @@
+Annual Business Survey
 Vacancy Survey
 Unit Trusts: Quarterly Return of Transactions
 Unit Trusts: Annual Return of Liabilities and Assets
@@ -24,7 +25,6 @@ Investment Trusts Quarterly Return of Transactions
 Monthly Wages and Salaries Survey
 Annual Survey of Insurance Companies
 Index Number of Export Prices Provision Price Information
-Annual Business Survey
 Monthly Inquiry for Index of Numbers of Producer Prices - Price Quotation Return
 Monthly Inquiry for Index Numbers of Import Prices - Price Quotation Return
 Foreign Direct Investment (FDI)
